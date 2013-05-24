@@ -1,0 +1,1799 @@
+# Summary:
+# As evident in the charts from the KNN classification algorithm, 8 through 10 is the range of k provided the lowest error results. 
+#the system finds the k nearest neighbors among the training documents, and uses the categories of the knearest neighbors to weight the category candidates [1]. One of the drawbacks of kNN algorithm is its efficiency, as it needs to compare a test document with all samples in the training set. In addition, the performance of this algorithm greatly depends on two factors, that is, a suitable similarity function and an appropriate value for the parameter k.
+# KNN can help you predict the classification of data points by the number of nearest neighbords. 
+# Naive Bayes can help you predict In simple terms, a naive Bayes classifier assumes that the presence (or absence) of a particular feature of a class is unrelated to the presence (or absence) of any other feature, given the class variable. For example, a fruit may be considered to be an apple if it is red, round, and about 4" in diameter. Even if these features depend on each other or upon the existence of the other features, a naive Bayes classifier considers all of these properties to independently contribute to the probability that this fruit is an apple.
+# Naive is a better 
+
+> credit<- read.table("homework_1.txt")
+> names(credit) <-c("Status of existing checking account", "Duration in month", "Installment rate in percentage of disposable income", "Purpose", "Savings account/bonds", "Present employment since", "Personal status and sex", "Present residence since", "Number of people being liable to provide maintenance for", "Other debtors / guarantors", "Other installment plans", "Number of existing credits at this bank", "Property", "Telephone", "Credit amount", "Job", "Housing", "Credit history", "Other debtors / guarantors", "foreign worker", "IN1","IN2", "IN3", "IN4", "Classification" )
+> head(credit)
+  Status of existing checking account Duration in month
+1                                   1                 6
+2                                   2                48
+3                                   4                12
+4                                   1                42
+5                                   1                24
+6                                   4                36
+  Installment rate in percentage of disposable income Purpose
+1                                                   4      12
+2                                                   2      60
+3                                                   4      21
+4                                                   2      79
+5                                                   3      49
+6                                                   2      91
+  Savings account/bonds Present employment since
+1                     5                        5
+2                     1                        3
+3                     1                        4
+4                     1                        4
+5                     1                        3
+6                     5                        3
+  Personal status and sex Present residence since
+1                       3                       4
+2                       2                       2
+3                       3                       3
+4                       3                       4
+5                       3                       4
+6                       3                       4
+  Number of people being liable to provide maintenance for
+1                                                        1
+2                                                        1
+3                                                        1
+4                                                        2
+5                                                        4
+6                                                        4
+  Other debtors / guarantors Other installment plans
+1                         67                       3
+2                         22                       3
+3                         49                       3
+4                         45                       3
+5                         53                       3
+6                         35                       3
+  Number of existing credits at this bank Property Telephone
+1                                       2        1         2
+2                                       1        1         1
+3                                       1        2         1
+4                                       1        2         1
+5                                       2        2         1
+6                                       1        2         2
+  Credit amount Job Housing Credit history Other debtors / guarantors
+1             1   0       0              1                          0
+2             1   0       0              1                          0
+3             1   0       0              1                          0
+4             1   0       0              0                          0
+5             1   1       0              1                          0
+6             1   0       0              1                          0
+  foreign worker IN1 IN2 IN3 IN4 Classification
+1              0   1   0   0   1              1
+2              0   1   0   0   1              2
+3              0   1   0   1   0              1
+4              0   0   0   0   1              1
+5              0   0   0   0   1              2
+6              0   0   0   1   0              1
+> credit$Classification <-factor(credit$Classification)
+> labels<- credit$Classification
+> set.seed(1234)
+> N <-nrow(credit)
+> train.pct <- .7
+> train.index <- sample(1:N, train.pct * N) 
+> train.credit <- credit[train.index, ] 
+> test.credit <- credit[-train.index, ] 
+> train.labels <- as.factor(as.matrix(labels)[train.index, ]) 
+> test.labels <- as.factor(as.matrix(labels)[-train.index, ]) 
+> err.rates <- data.frame()
+> max.k <- 10
+> for (k in 1:max.k) {
++     knn.fit <- knn(
++         train = train.credit,
++         test = test.credit,
++         cl = train.labels,
++         k = k
++     )
++     cat('\n', 'k = ', k, ', train.pct = ', train.pct, '\n', sep='')
++     print(table(test.labels, knn.fit))
++     this.err <- sum(test.labels != knn.fit) / length(test.labels)
++     err.rates <- rbind(err.rates, this.err)
++ }
+k = 1, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 141  60
+          2  55  44
+
+k = 2, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 144  57
+          2  59  40
+
+k = 3, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 162  39
+          2  61  38
+
+k = 4, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 162  39
+          2  65  34
+
+k = 5, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 176  25
+          2  68  31
+
+k = 6, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 177  24
+          2  68  31
+
+k = 7, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 179  22
+          2  79  20
+
+k = 8, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 179  22
+          2  77  22
+
+k = 9, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 179  22
+          2  81  18
+
+k = 10, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 180  21
+          2  75  24
+> title <- paste('knn results (train.pct = ', train.pct, ')', sep='')
+> results.plot <- ggplot(results, aes(x=k, y=err.rate)) + geom_point() + geom_line()
+> results.plot <- results.plot + ggtitle(title)
+> results.plot
+> N <-nrow(credit)
+> train.pct <- .7
+> train.index <- sample(1:N, train.pct * N) 
+> train.credit <- credit[train.index, ] 
+> test.credit <- credit[-train.index, ] 
+> train.labels <- as.factor(as.matrix(labels)[train.index, ]) 
+> test.labels <- as.factor(as.matrix(labels)[-train.index, ]) 
+> err.rates <- data.frame()
+> max.k <- 10
+> for (k in 1:max.k) {
++     knn.fit <- knn(
++         train = train.credit,
++         test = test.credit,
++         cl = train.labels,
++         k = k
++     )
++     cat('\n', 'k = ', k, ', train.pct = ', train.pct, '\n', sep='')
++     print(table(test.labels, knn.fit))
++     this.err <- sum(test.labels != knn.fit) / length(test.labels)
++     err.rates <- rbind(err.rates, this.err)
++ }
+
+k = 1, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 152  54
+          2  55  39
+
+k = 2, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 157  49
+          2  52  42
+
+k = 3, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 175  31
+          2  63  31
+
+k = 4, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 171  35
+          2  61  33
+
+k = 5, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 177  29
+          2  60  34
+
+k = 6, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 180  26
+          2  57  37
+
+k = 7, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 183  23
+          2  59  35
+
+k = 8, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 185  21
+          2  67  27
+
+k = 9, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 187  19
+          2  65  29
+
+k = 10, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 191  15
+          2  66  28
+> title <- paste('knn results (train.pct = ', train.pct, ')', sep='')
+> results.plot <- ggplot(results, aes(x=k, y=err.rate)) + geom_point() + geom_line()
+> results.plot <- results.plot + ggtitle(title)
+> results.plot
+> N <-nrow(credit)
+> train.pct <- .7
+> train.index <- sample(1:N, train.pct * N) 
+> train.credit <- credit[train.index, ] 
+> test.credit <- credit[-train.index, ] 
+> train.labels <- as.factor(as.matrix(labels)[train.index, ]) 
+> test.labels <- as.factor(as.matrix(labels)[-train.index, ]) 
+> err.rates <- data.frame()
+> max.k <- 10
+> for (k in 1:max.k) {
++     knn.fit <- knn(
++         train = train.credit,
++         test = test.credit,
++         cl = train.labels,
++         k = k
++     )
++     cat('\n', 'k = ', k, ', train.pct = ', train.pct, '\n', sep='')
++     print(table(test.labels, knn.fit))
++     this.err <- sum(test.labels != knn.fit) / length(test.labels)
++     err.rates <- rbind(err.rates, this.err)
++ }
+
+k = 1, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 162  47
+          2  54  37
+
+k = 2, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 162  47
+          2  55  36
+
+k = 3, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 173  36
+          2  59  32
+
+k = 4, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 170  39
+          2  62  29
+
+k = 5, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 176  33
+          2  63  28
+
+k = 6, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 173  36
+          2  60  31
+
+k = 7, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 183  26
+          2  63  28
+
+k = 8, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 180  29
+          2  65  26
+
+k = 9, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 185  24
+          2  65  26
+
+k = 10, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 186  23
+          2  68  23
+> title <- paste('knn results (train.pct = ', train.pct, ')', sep='')
+> results.plot <- ggplot(results, aes(x=k, y=err.rate)) + geom_point() + geom_line()
+> results.plot <- results.plot + ggtitle(title)
+> results.plot
+> N <-nrow(credit)
+> train.pct <- .7
+> train.index <- sample(1:N, train.pct * N) 
+> train.credit <- credit[train.index, ] 
+> test.credit <- credit[-train.index, ] 
+> train.labels <- as.factor(as.matrix(labels)[train.index, ]) 
+> test.labels <- as.factor(as.matrix(labels)[-train.index, ]) 
+> err.rates <- data.frame()
+> max.k <- 10
+> for (k in 1:max.k) {
++     knn.fit <- knn(
++         train = train.credit,
++         test = test.credit,
++         cl = train.labels,
++         k = k
++     )
++     cat('\n', 'k = ', k, ', train.pct = ', train.pct, '\n', sep='')
++     print(table(test.labels, knn.fit))
++     this.err <- sum(test.labels != knn.fit) / length(test.labels)
++     err.rates <- rbind(err.rates, this.err)
++ }
+
+k = 1, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 161  44
+          2  58  37
+
+k = 2, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 159  46
+          2  60  35
+
+k = 3, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 174  31
+          2  73  22
+
+k = 4, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 174  31
+          2  71  24
+
+k = 5, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 182  23
+          2  71  24
+
+k = 6, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 188  17
+          2  66  29
+
+k = 7, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 192  13
+          2  71  24
+
+k = 8, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 193  12
+          2  74  21
+
+k = 9, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 197   8
+          2  71  24
+
+k = 10, train.pct = 0.7
+           knn.fit
+test.labels   1   2
+          1 199   6
+          2  75  20
+> title <- paste('knn results (train.pct = ', train.pct, ')', sep='')
+> results.plot <- ggplot(results, aes(x=k, y=err.rate)) + geom_point() + geom_line()
+> results.plot <- results.plot + ggtitle(title)
+> results.plot
+
+#Naive Bayesian Algorithm
+
+> credit<- read.table("homework_1.txt")
+> names(credit) <-c("Status of existing checking account", "Duration in month", "Installment rate in percentage of disposable income", "Purpose", "Savings account/bonds", "Present employment since", "Personal status and sex", "Present residence since", "Number of people being liable to provide maintenance for", "Age in Years", "Other installment plans", "Number of existing credits at this bank", "Property", "Telephone", "Credit amount", "Job", "Housing", "Credit history", "Other debtors / guarantors", "foreign worker", "IN1","IN2", "IN3", "IN4", "Classification" )
+> head(credit)
+  Status of existing checking account Duration in month
+1                                   1                 6
+2                                   2                48
+3                                   4                12
+4                                   1                42
+5                                   1                24
+6                                   4                36
+  Installment rate in percentage of disposable income Purpose
+1                                                   4      12
+2                                                   2      60
+3                                                   4      21
+4                                                   2      79
+5                                                   3      49
+6                                                   2      91
+  Savings account/bonds Present employment since
+1                     5                        5
+2                     1                        3
+3                     1                        4
+4                     1                        4
+5                     1                        3
+6                     5                        3
+  Personal status and sex Present residence since
+1                       3                       4
+2                       2                       2
+3                       3                       3
+4                       3                       4
+5                       3                       4
+6                       3                       4
+  Number of people being liable to provide maintenance for Age in Years
+1                                                        1           67
+2                                                        1           22
+3                                                        1           49
+4                                                        2           45
+5                                                        4           53
+6                                                        4           35
+  Other installment plans Number of existing credits at this bank
+1                       3                                       2
+2                       3                                       1
+3                       3                                       1
+4                       3                                       1
+5                       3                                       2
+6                       3                                       1
+  Property Telephone Credit amount Job Housing Credit history
+1        1         2             1   0       0              1
+2        1         1             1   0       0              1
+3        2         1             1   0       0              1
+4        2         1             1   0       0              0
+5        2         1             1   1       0              1
+6        2         2             1   0       0              1
+  Other debtors / guarantors foreign worker IN1 IN2 IN3 IN4
+1                          0              0   1   0   0   1
+2                          0              0   1   0   0   1
+3                          0              0   1   0   1   0
+4                          0              0   0   0   0   1
+5                          0              0   0   0   0   1
+6                          0              0   0   0   1   0
+  Classification
+1              1
+2              2
+3              1
+4              1
+5              2
+6              1
+> m
+
+Naive Bayes Classifier for Discrete Predictors
+
+Call:
+naiveBayes.default(x = X, y = Y, laplace = laplace)
+
+A-priori probabilities:
+Y
+  1   2 
+0.7 0.3 
+
+Conditional probabilities:
+   Status of existing checking account
+Y       [,1]     [,2]
+  1 2.865714 1.228755
+  2 1.903333 1.050874
+
+   Duration in month
+Y       [,1]     [,2]
+  1 19.20714 11.07956
+  2 24.86000 13.28264
+
+   Installment rate in percentage of disposable income
+Y       [,1]     [,2]
+  1 2.707143 1.044753
+  2 2.166667 1.078316
+
+   Purpose
+Y       [,1]     [,2]
+  1 29.86286 24.04433
+  2 39.35667 35.38469
+
+   Savings account/bonds
+Y       [,1]     [,2]
+  1 2.290000 1.651344
+  2 1.673333 1.303439
+
+   Present employment since
+Y       [,1]     [,2]
+  1 3.475714 1.190441
+  2 3.170000 1.224513
+
+   Personal status and sex
+Y       [,1]      [,2]
+  1 2.722857 0.6914916
+  2 2.586667 0.7377691
+
+   Present residence since
+Y       [,1]     [,2]
+  1 2.842857 1.108373
+  2 2.850000 1.094605
+
+   Number of people being liable to provide maintenance for
+Y       [,1]     [,2]
+  1 2.260000 1.037688
+  2 2.586667 1.045370
+
+   Other debtors / guarantors
+Y       [,1]     [,2]
+  1 36.22429 11.38114
+  2 33.96333 11.22238
+
+   Other installment plans
+Y       [,1]      [,2]
+  1 2.725714 0.6587554
+  2 2.556667 0.7930228
+
+   Number of existing credits at this bank
+Y       [,1]      [,2]
+  1 1.424286 0.5847210
+  2 1.366667 0.5597021
+
+   Property
+Y       [,1]      [,2]
+  1 1.155714 0.3628435
+  2 1.153333 0.3609105
+
+   Telephone
+Y       [,1]      [,2]
+  1 1.415714 0.4931971
+  2 1.376667 0.4853598
+
+   Credit amount
+Y       [,1]      [,2]
+  1 1.047143 0.2120959
+  2 1.013333 0.1148893
+
+   Job
+Y        [,1]      [,2]
+  1 0.2071429 0.4055486
+  2 0.2966667 0.4575515
+
+   Housing
+Y         [,1]      [,2]
+  1 0.12285714 0.3285079
+  2 0.05666667 0.2315909
+
+   Credit history
+Y        [,1]      [,2]
+  1 0.9071429 0.2904397
+  2 0.9066667 0.2913850
+
+   OtherDebtorsGuarantors
+Y         [,1]      [,2]
+  1 0.03285714 0.1783901
+  2 0.06000000 0.2378836
+
+   foreign worker
+Y        [,1]      [,2]
+  1 0.1557143 0.3628435
+  2 0.2333333 0.4236593
+
+   IN1
+Y        [,1]      [,2]
+  1 0.7528571 0.4316590
+  2 0.6200000 0.4861974
+
+   IN2
+Y         [,1]      [,2]
+  1 0.02142857 0.1449117
+  2 0.02333333 0.1512121
+
+   IN3
+Y        [,1]      [,2]
+  1 0.2057143 0.4045117
+  2 0.1866667 0.3902947
+
+   IN4
+Y        [,1]      [,2]
+  1 0.6342857 0.4819743
+  2 0.6200000 0.4861974
+
+> table(predict(m, credit))
+< table of extent 0 >
+> table(predict(m, as.data.frame(credit))
++ 
++ )
+< table of extent 0 >
+
+#Running naive Bayes
+m <- naiveBayes(Classification ~., data=credit)
+m
+Naive Bayes Classifier for Discrete Predictors
+
+Call:
+naiveBayes.default(x = X, y = Y, laplace = laplace)
+
+A-priori probabilities:
+Y
+  1   2 
+0.7 0.3 
+
+Conditional probabilities:
+   Status of existing checking account
+Y       [,1]     [,2]
+  1 2.865714 1.228755
+  2 1.903333 1.050874
+
+   Duration in month
+Y       [,1]     [,2]
+  1 19.20714 11.07956
+  2 24.86000 13.28264
+
+   Installment rate in percentage of disposable income
+Y       [,1]     [,2]
+  1 2.707143 1.044753
+  2 2.166667 1.078316
+
+   Purpose
+Y       [,1]     [,2]
+  1 29.86286 24.04433
+  2 39.35667 35.38469
+
+   Savings account/bonds
+Y       [,1]     [,2]
+  1 2.290000 1.651344
+  2 1.673333 1.303439
+
+   Present employment since
+Y       [,1]     [,2]
+  1 3.475714 1.190441
+  2 3.170000 1.224513
+
+   Personal status and sex
+Y       [,1]      [,2]
+  1 2.722857 0.6914916
+  2 2.586667 0.7377691
+
+   Present residence since
+Y       [,1]     [,2]
+  1 2.842857 1.108373
+  2 2.850000 1.094605
+
+   Number of people being liable to provide maintenance for
+Y       [,1]     [,2]
+  1 2.260000 1.037688
+  2 2.586667 1.045370
+
+   Age in Years
+Y       [,1]     [,2]
+  1 36.22429 11.38114
+  2 33.96333 11.22238
+
+   Other installment plans
+Y       [,1]      [,2]
+  1 2.725714 0.6587554
+  2 2.556667 0.7930228
+
+   Number of existing credits at this bank
+Y       [,1]      [,2]
+  1 1.424286 0.5847210
+  2 1.366667 0.5597021
+
+   Property
+Y       [,1]      [,2]
+  1 1.155714 0.3628435
+  2 1.153333 0.3609105
+
+   Telephone
+Y       [,1]      [,2]
+  1 1.415714 0.4931971
+  2 1.376667 0.4853598
+
+   Credit amount
+Y       [,1]      [,2]
+  1 1.047143 0.2120959
+  2 1.013333 0.1148893
+
+   Job
+Y        [,1]      [,2]
+  1 0.2071429 0.4055486
+  2 0.2966667 0.4575515
+
+   Housing
+Y         [,1]      [,2]
+  1 0.12285714 0.3285079
+  2 0.05666667 0.2315909
+
+   Credit history
+Y        [,1]      [,2]
+  1 0.9071429 0.2904397
+  2 0.9066667 0.2913850
+
+   Other debtors / guarantors
+Y         [,1]      [,2]
+  1 0.03285714 0.1783901
+  2 0.06000000 0.2378836
+
+   foreign worker
+Y        [,1]      [,2]
+  1 0.1557143 0.3628435
+  2 0.2333333 0.4236593
+
+   IN1
+Y        [,1]      [,2]
+  1 0.7528571 0.4316590
+  2 0.6200000 0.4861974
+
+   IN2
+Y         [,1]      [,2]
+  1 0.02142857 0.1449117
+  2 0.02333333 0.1512121
+
+   IN3
+Y        [,1]      [,2]
+  1 0.2057143 0.4045117
+  2 0.1866667 0.3902947
+
+   IN4
+Y        [,1]      [,2]
+  1 0.6342857 0.4819743
+  2 0.6200000 0.4861974
+
+# showing the table
+table(predict(m, credit), credit[, 25])
+    1   2
+  1 550 106
+  2 150 194
+
+
+> summary(m)
+        Length Class  Mode     
+apriori  2     table  numeric  
+tables  24     -none- list     
+levels   2     -none- character
+call     4     -none- call     
+
+
+# Training Set & Test Set. Used instruction from http://joshwalters.github.io/2012/11/27/naive-bayes-classification-in-r.html (source)
+> x1= credit[,-25]
+> y1=credit$Classification
+> model = train(x1,y1,'nb',trControl=trainControl(method='cv',number=10))
+There were 50 or more warnings (use warnings() to see the first 50)
+> model
+1000 samples
+  24 predictors
+   2 classes: '1', '2' 
+
+No pre-processing
+Resampling: Cross-Validation (10 fold) 
+
+Summary of sample sizes: 900, 900, 900, 900, 900, 900, ... 
+
+Resampling results across tuning parameters:
+
+  usekernel  Accuracy  Kappa  Accuracy SD  Kappa SD
+  FALSE      0.724     0.376  0.0363       0.0681  
+  TRUE       0.713     0.124  0.0211       0.06    
+
+Tuning parameter 'fL' was held constant at a value of 0
+Accuracy was used to select the optimal model using  the largest value.
+The final values used for the model were fL = 0 and usekernel = FALSE. 
+> predict(model$finalModel,x1)
+# Console cut; too long
+  [43,] 8.148000e-01 1.852000e-01
+  [44,] 9.490150e-01 5.098496e-02
+  [45,] 9.118096e-01 8.819039e-02
+  [46,] 8.989731e-01 1.010269e-01
+  [47,] 9.248512e-01 7.514877e-02
+  [48,] 7.367147e-01 2.632853e-01
+  [49,] 9.018829e-01 9.811707e-02
+  [50,] 1.705041e-02 9.829496e-01
+  [51,] 8.185436e-01 1.814564e-01
+  [52,] 9.954652e-01 4.534822e-03
+  [53,] 9.115156e-01 8.848439e-02
+  [54,] 9.999343e-01 6.568110e-05
+  [55,] 9.832163e-02 9.016784e-01
+  [56,] 9.687643e-01 3.123568e-02
+  [57,] 8.277903e-01 1.722097e-01
+  [58,] 3.113000e-01 6.887000e-01
+  [59,] 5.892556e-01 4.107444e-01
+  [60,] 3.934293e-05 9.999607e-01
+  [61,] 4.686325e-01 5.313675e-01
+  [62,] 9.946013e-01 5.398699e-03
+  [63,] 1.660035e-01 8.339965e-01
+  [64,] 7.774662e-05 9.999223e-01
+  [65,] 8.711014e-01 1.288986e-01
+  [66,] 9.980684e-01 1.931630e-03
+  [67,] 5.765228e-01 4.234772e-01
+  [68,] 8.244077e-01 1.755923e-01
+  [69,] 5.212897e-01 4.787103e-01
+  [70,] 9.561003e-01 4.389974e-02
+  [71,] 9.502637e-01 4.973628e-02
+  [72,] 9.927468e-01 7.253227e-03
+  [73,] 3.466259e-01 6.533741e-01
+  [74,] 2.400728e-01 7.599272e-01
+  [75,] 8.109636e-01 1.890364e-01
+  [76,] 9.970322e-01 2.967821e-03
+  [77,] 1.439989e-01 8.560011e-01
+  [78,] 8.460440e-01 1.539560e-01
+  [79,] 9.749358e-01 2.506421e-02
+  [80,] 4.702211e-01 5.297789e-01
+  [81,] 9.747733e-01 2.522666e-02
+  [82,] 9.750220e-01 2.497795e-02
+  [83,] 6.443374e-01 3.556626e-01
+  [84,] 7.806852e-01 2.193148e-01
+  [85,] 8.431057e-01 1.568943e-01
+  [86,] 9.793306e-01 2.066938e-02
+  [87,] 7.881826e-01 2.118174e-01
+  [88,] 2.671015e-03 9.973290e-01
+  [89,] 4.235457e-01 5.764543e-01
+  [90,] 4.694431e-01 5.305569e-01
+  [91,] 9.908752e-01 9.124819e-03
+  [92,] 9.992132e-01 7.868383e-04
+  [93,] 9.878635e-01 1.213648e-02
+  [94,] 7.637966e-03 9.923620e-01
+  [95,] 9.317849e-01 6.821515e-02
+  [96,] 9.657639e-07 9.999990e-01
+  [97,] 9.973778e-01 2.622169e-03
+  [98,] 6.795517e-01 3.204483e-01
+  [99,] 8.231053e-01 1.768947e-01
+ [100,] 9.829287e-01 1.707134e-02
+ [101,] 7.040709e-01 2.959291e-01
+ [102,] 9.179024e-02 9.082098e-01
+ [103,] 9.559697e-01 4.403030e-02
+ [104,] 5.095466e-01 4.904534e-01
+ [105,] 9.992817e-01 7.183194e-04
+ [106,] 6.401449e-05 9.999360e-01
+ [107,] 2.872203e-01 7.127797e-01
+ [108,] 3.426483e-01 6.573517e-01
+ [109,] 1.000000e+00 1.626124e-12
+ [110,] 9.205002e-01 7.949977e-02
+ [111,] 3.795986e-01 6.204014e-01
+ [112,] 2.805185e-01 7.194815e-01
+ [113,] 1.056934e-01 8.943066e-01
+ [114,] 5.271495e-01 4.728505e-01
+ [115,] 8.602212e-01 1.397788e-01
+ [116,] 9.909658e-01 9.034174e-03
+ [117,] 3.669082e-01 6.330918e-01
+ [118,] 1.000000e+00 6.395233e-10
+ [119,] 5.794287e-01 4.205713e-01
+ [120,] 7.013985e-01 2.986015e-01
+ [121,] 6.108397e-01 3.891603e-01
+ [122,] 9.980071e-01 1.992890e-03
+ [123,] 7.587649e-01 2.412351e-01
+ [124,] 8.442317e-01 1.557683e-01
+ [125,] 6.434232e-01 3.565768e-01
+ [126,] 6.668109e-01 3.331891e-01
+ [127,] 7.325858e-01 2.674142e-01
+ [128,] 6.282196e-01 3.717804e-01
+ [129,] 9.978940e-01 2.106032e-03
+ [130,] 1.720065e-03 9.982799e-01
+ [131,] 9.383476e-02 9.061652e-01
+ [132,] 1.826847e-01 8.173153e-01
+ [133,] 7.681317e-01 2.318683e-01
+ [134,] 5.224123e-01 4.775877e-01
+ [135,] 3.530178e-02 9.646982e-01
+ [136,] 9.985786e-01 1.421430e-03
+ [137,] 9.987262e-01 1.273838e-03
+ [138,] 9.342912e-01 6.570884e-02
+ [139,] 9.752205e-01 2.477950e-02
+ [140,] 4.382843e-01 5.617157e-01
+ [141,] 1.000000e+00 2.028278e-12
+ [142,] 1.884625e-01 8.115375e-01
+ [143,] 3.587928e-01 6.412072e-01
+ [144,] 4.600769e-01 5.399231e-01
+ [145,] 9.493295e-01 5.067045e-02
+ [146,] 1.526922e-01 8.473078e-01
+ [147,] 6.061821e-01 3.938179e-01
+ [148,] 9.638437e-01 3.615626e-02
+ [149,] 4.736905e-01 5.263095e-01
+ [150,] 9.949723e-01 5.027681e-03
+ [151,] 6.684254e-01 3.315746e-01
+ [152,] 1.000000e+00 1.050549e-13
+ [153,] 4.239462e-01 5.760538e-01
+ [154,] 9.694358e-01 3.056419e-02
+ [155,] 1.543093e-01 8.456907e-01
+ [156,] 8.463594e-02 9.153641e-01
+ [157,] 1.000000e+00 1.567640e-13
+ [158,] 2.218898e-01 7.781102e-01
+ [159,] 2.181893e-01 7.818107e-01
+ [160,] 9.985876e-01 1.412351e-03
+ [161,] 9.883228e-01 1.167725e-02
+ [162,] 9.124182e-01 8.758179e-02
+ [163,] 9.807871e-01 1.921286e-02
+ [164,] 2.432443e-02 9.756756e-01
+ [165,] 8.668907e-01 1.331093e-01
+ [166,] 9.631825e-01 3.681750e-02
+ [167,] 2.971203e-01 7.028797e-01
+ [168,] 8.565694e-01 1.434306e-01
+ [169,] 5.633190e-01 4.366810e-01
+ [170,] 8.411632e-01 1.588368e-01
+ [171,] 3.656708e-02 9.634329e-01
+ [172,] 9.421468e-01 5.785321e-02
+ [173,] 6.023361e-01 3.976639e-01
+ [174,] 1.000000e+00 6.535072e-13
+ [175,] 6.253437e-01 3.746563e-01
+ [176,] 9.961566e-01 3.843439e-03
+ [177,] 3.710760e-01 6.289240e-01
+ [178,] 9.209704e-01 7.902963e-02
+ [179,] 7.397173e-01 2.602827e-01
+ [180,] 8.476766e-01 1.523234e-01
+ [181,] 1.675945e-01 8.324055e-01
+ [182,] 3.574177e-01 6.425823e-01
+ [183,] 8.197606e-01 1.802394e-01
+ [184,] 9.947242e-01 5.275831e-03
+ [185,] 4.100611e-01 5.899389e-01
+ [186,] 9.778218e-01 2.217819e-02
+ [187,] 9.488914e-01 5.110857e-02
+ [188,] 2.405562e-01 7.594438e-01
+ [189,] 6.510743e-01 3.489257e-01
+ [190,] 1.076223e-01 8.923777e-01
+ [191,] 9.899120e-01 1.008800e-02
+ [192,] 3.920352e-02 9.607965e-01
+ [193,] 5.832067e-01 4.167933e-01
+ [194,] 7.923737e-01 2.076263e-01
+ [195,] 5.309310e-02 9.469069e-01
+ [196,] 8.779223e-01 1.220777e-01
+ [197,] 9.687078e-01 3.129225e-02
+ [198,] 1.215419e-01 8.784581e-01
+ [199,] 9.934942e-01 6.505833e-03
+ [200,] 5.571244e-01 4.428756e-01
+ [201,] 9.937217e-01 6.278302e-03
+ [202,] 5.041690e-01 4.958310e-01
+ [203,] 9.145700e-01 8.542998e-02
+ [204,] 1.762892e-01 8.237108e-01
+ [205,] 9.834397e-01 1.656028e-02
+ [206,] 8.775666e-01 1.224334e-01
+ [207,] 9.954157e-01 4.584277e-03
+ [208,] 8.739303e-01 1.260697e-01
+ [209,] 1.838119e-01 8.161881e-01
+ [210,] 1.000000e+00 1.877575e-16
+ [211,] 9.981852e-01 1.814789e-03
+ [212,] 9.904029e-01 9.597146e-03
+ [213,] 1.339441e-01 8.660559e-01
+ [214,] 9.542214e-01 4.577862e-02
+ [215,] 9.948022e-01 5.197818e-03
+ [216,] 9.868640e-01 1.313602e-02
+ [217,] 1.158197e-01 8.841803e-01
+ [218,] 7.081038e-01 2.918962e-01
+ [219,] 7.991306e-02 9.200869e-01
+ [220,] 8.993345e-01 1.006655e-01
+ [221,] 3.710574e-01 6.289426e-01
+ [222,] 2.044937e-01 7.955063e-01
+ [223,] 8.274471e-01 1.725529e-01
+ [224,] 9.965719e-01 3.428085e-03
+ [225,] 9.991288e-01 8.712049e-04
+ [226,] 6.033276e-01 3.966724e-01
+ [227,] 5.175037e-06 9.999948e-01
+ [228,] 1.565118e-01 8.434882e-01
+ [229,] 9.265954e-01 7.340460e-02
+ [230,] 3.351901e-02 9.664810e-01
+ [231,] 5.279798e-01 4.720202e-01
+ [232,] 8.852776e-01 1.147224e-01
+ [233,] 9.334992e-01 6.650075e-02
+ [234,] 7.593437e-01 2.406563e-01
+ [235,] 9.950822e-01 4.917801e-03
+ [236,] 2.260268e-01 7.739732e-01
+ [237,] 6.081739e-04 9.993918e-01
+ [238,] 7.865292e-02 9.213471e-01
+ [239,] 9.732572e-01 2.674280e-02
+ [240,] 5.652650e-01 4.347350e-01
+ [241,] 3.586139e-01 6.413861e-01
+ [242,] 9.683648e-01 3.163519e-02
+ [243,] 6.705790e-01 3.294210e-01
+ [244,] 9.767963e-01 2.320370e-02
+ [245,] 9.540531e-01 4.594694e-02
+ [246,] 9.520332e-01 4.796684e-02
+ [247,] 9.949834e-01 5.016584e-03
+ [248,] 1.000000e+00 4.824179e-11
+ [249,] 8.315010e-01 1.684990e-01
+ [250,] 8.106940e-04 9.991893e-01
+ [251,] 9.285621e-01 7.143787e-02
+ [252,] 8.314613e-01 1.685387e-01
+ [253,] 4.086139e-02 9.591386e-01
+ [254,] 9.589440e-01 4.105601e-02
+ [255,] 9.556266e-01 4.437336e-02
+ [256,] 3.002414e-01 6.997586e-01
+ [257,] 9.829038e-01 1.709617e-02
+ [258,] 7.955502e-02 9.204450e-01
+ [259,] 9.988210e-01 1.178989e-03
+ [260,] 9.905222e-01 9.477773e-03
+ [261,] 6.529310e-01 3.470690e-01
+ [262,] 5.682409e-01 4.317591e-01
+ [263,] 4.218290e-01 5.781710e-01
+ [264,] 8.847918e-01 1.152082e-01
+ [265,] 1.000000e+00 4.454254e-14
+ [266,] 7.350279e-01 2.649721e-01
+ [267,] 9.921504e-01 7.849585e-03
+ [268,] 8.027245e-01 1.972755e-01
+ [269,] 1.000000e+00 3.532640e-11
+ [270,] 9.901319e-01 9.868149e-03
+ [271,] 1.000000e+00 3.779663e-14
+ [272,] 8.932635e-01 1.067365e-01
+ [273,] 9.742575e-07 9.999990e-01
+ [274,] 3.642183e-01 6.357817e-01
+ [275,] 2.444475e-03 9.975555e-01
+ [276,] 9.583932e-01 4.160681e-02
+ [277,] 9.545763e-01 4.542372e-02
+ [278,] 9.347993e-01 6.520066e-02
+ [279,] 8.803430e-01 1.196570e-01
+ [280,] 5.961452e-01 4.038548e-01
+ [281,] 9.994785e-01 5.215407e-04
+ [282,] 9.676749e-01 3.232509e-02
+ [283,] 8.786971e-01 1.213029e-01
+ [284,] 9.987494e-01 1.250631e-03
+ [285,] 4.051790e-01 5.948210e-01
+ [286,] 3.749715e-03 9.962503e-01
+ [287,] 9.482129e-01 5.178705e-02
+ [288,] 2.289589e-02 9.771041e-01
+ [289,] 8.268875e-01 1.731125e-01
+ [290,] 6.141311e-01 3.858689e-01
+ [291,] 1.000000e+00 9.804810e-14
+ [292,] 4.564292e-01 5.435708e-01
+ [293,] 9.835024e-01 1.649759e-02
+ [294,] 9.928248e-01 7.175193e-03
+ [295,] 5.835331e-01 4.164669e-01
+ [296,] 8.446963e-03 9.915530e-01
+ [297,] 9.981959e-01 1.804050e-03
+ [298,] 1.000000e+00 1.871801e-11
+ [299,] 9.647593e-01 3.524069e-02
+ [300,] 9.585863e-01 4.141372e-02
+ [301,] 4.898989e-01 5.101011e-01
+ [302,] 1.764626e-01 8.235374e-01
+ [303,] 9.519845e-01 4.801549e-02
+ [304,] 3.812640e-03 9.961874e-01
+ [305,] 1.218041e-02 9.878196e-01
+ [306,] 9.698127e-01 3.018733e-02
+ [307,] 9.979733e-01 2.026725e-03
+ [308,] 5.212716e-01 4.787284e-01
+ [309,] 6.932761e-01 3.067239e-01
+ [310,] 1.708250e-01 8.291750e-01
+ [311,] 8.112199e-03 9.918878e-01
+ [312,] 7.849487e-01 2.150513e-01
+ [313,] 5.857184e-01 4.142816e-01
+ [314,] 1.832584e-01 8.167416e-01
+ [315,] 1.000000e+00 8.655945e-14
+ [316,] 6.325728e-02 9.367427e-01
+ [317,] 6.515405e-01 3.484595e-01
+ [318,] 9.443298e-01 5.567022e-02
+ [319,] 9.701572e-01 2.984276e-02
+ [320,] 7.555809e-01 2.444191e-01
+ [321,] 3.800042e-01 6.199958e-01
+ [322,] 2.614462e-01 7.385538e-01
+ [323,] 9.768925e-01 2.310754e-02
+ [324,] 7.601659e-01 2.398341e-01
+ [325,] 9.488332e-01 5.116683e-02
+ [326,] 1.000000e+00 5.142861e-13
+ [327,] 9.825505e-01 1.744946e-02
+ [328,] 9.353617e-01 6.463833e-02
+ [329,] 6.223734e-01 3.776266e-01
+ [330,] 7.314434e-01 2.685566e-01
+ [331,] 9.835980e-01 1.640199e-02
+ [332,] 9.799102e-01 2.008983e-02
+ [333,] 5.473803e-03 9.945262e-01
+ [334,] 1.795178e-01 8.204822e-01
+ [335,] 7.318881e-03 9.926811e-01
+ [336,] 2.821941e-01 7.178059e-01
+ [337,] 6.017177e-01 3.982823e-01
+ [338,] 4.285226e-01 5.714774e-01
+ [339,] 4.561726e-01 5.438274e-01
+ [340,] 4.947201e-01 5.052799e-01
+ [341,] 3.046658e-01 6.953342e-01
+ [342,] 1.008986e-01 8.991014e-01
+ [343,] 3.515686e-01 6.484314e-01
+ [344,] 8.348503e-04 9.991651e-01
+ [345,] 7.130546e-01 2.869454e-01
+ [346,] 9.672396e-01 3.276036e-02
+ [347,] 8.636456e-01 1.363544e-01
+ [348,] 1.111786e-02 9.888821e-01
+ [349,] 9.851257e-01 1.487429e-02
+ [350,] 9.016819e-01 9.831806e-02
+ [351,] 6.363774e-01 3.636226e-01
+ [352,] 1.000000e+00 1.723339e-12
+ [353,] 9.999191e-01 8.092922e-05
+ [354,] 4.292393e-02 9.570761e-01
+ [355,] 9.330607e-01 6.693927e-02
+ [356,] 3.621826e-01 6.378174e-01
+ [357,] 4.923309e-01 5.076691e-01
+ [358,] 8.657783e-01 1.342217e-01
+ [359,] 9.512461e-01 4.875385e-02
+ [360,] 1.027687e-01 8.972313e-01
+ [361,] 8.804945e-01 1.195055e-01
+ [362,] 9.789406e-01 2.105937e-02
+ [363,] 6.978248e-01 3.021752e-01
+ [364,] 6.720988e-01 3.279012e-01
+ [365,] 6.809595e-02 9.319040e-01
+ [366,] 9.480839e-01 5.191605e-02
+ [367,] 9.997400e-01 2.599899e-04
+ [368,] 5.826795e-02 9.417321e-01
+ [369,] 4.023741e-01 5.976259e-01
+ [370,] 3.010128e-01 6.989872e-01
+ [371,] 9.649452e-01 3.505480e-02
+ [372,] 9.640935e-01 3.590654e-02
+ [373,] 8.193177e-01 1.806823e-01
+ [374,] 1.093988e-03 9.989060e-01
+ [375,] 3.950021e-06 9.999960e-01
+ [376,] 2.535650e-03 9.974644e-01
+ [377,] 9.598634e-01 4.013657e-02
+ [378,] 9.860553e-01 1.394466e-02
+ [379,] 2.652183e-04 9.997348e-01
+ [380,] 9.575146e-01 4.248544e-02
+ [381,] 9.256862e-01 7.431378e-02
+ [382,] 1.267117e-01 8.732883e-01
+ [383,] 8.253955e-01 1.746045e-01
+ [384,] 7.100312e-01 2.899688e-01
+ [385,] 9.465582e-01 5.344177e-02
+ [386,] 9.554537e-01 4.454632e-02
+ [387,] 9.203359e-01 7.966406e-02
+ [388,] 4.916314e-01 5.083686e-01
+ [389,] 6.107935e-01 3.892065e-01
+ [390,] 9.243518e-01 7.564820e-02
+ [391,] 8.769485e-01 1.230515e-01
+ [392,] 4.703761e-01 5.296239e-01
+ [393,] 1.723917e-02 9.827608e-01
+ [394,] 7.198040e-01 2.801960e-01
+ [395,] 9.418451e-01 5.815488e-02
+ [396,] 2.041973e-03 9.979580e-01
+ [397,] 1.831876e-01 8.168124e-01
+ [398,] 7.254871e-01 2.745129e-01
+ [399,] 1.720650e-01 8.279350e-01
+ [400,] 9.942203e-01 5.779688e-03
+ [401,] 9.538542e-01 4.614583e-02
+ [402,] 9.382233e-01 6.177666e-02
+ [403,] 3.033523e-01 6.966477e-01
+ [404,] 9.119288e-01 8.807124e-02
+ [405,] 9.466781e-01 5.332194e-02
+ [406,] 6.196159e-01 3.803841e-01
+ [407,] 9.999776e-01 2.235688e-05
+ [408,] 1.000000e+00 1.619036e-12
+ [409,] 8.992262e-01 1.007738e-01
+ [410,] 9.758226e-01 2.417744e-02
+ [411,] 5.906673e-01 4.093327e-01
+ [412,] 9.987033e-01 1.296659e-03
+ [413,] 9.486977e-01 5.130229e-02
+ [414,] 1.000000e+00 1.595898e-12
+ [415,] 7.460470e-01 2.539530e-01
+ [416,] 9.995153e-01 4.847007e-04
+ [417,] 4.875668e-01 5.124332e-01
+ [418,] 2.058428e-01 7.941572e-01
+ [419,] 5.640026e-01 4.359974e-01
+ [420,] 8.538019e-01 1.461981e-01
+ [421,] 6.256882e-01 3.743118e-01
+ [422,] 9.994424e-01 5.575619e-04
+ [423,] 8.998916e-01 1.001084e-01
+ [424,] 9.791899e-01 2.081011e-02
+ [425,] 8.303857e-01 1.696143e-01
+ [426,] 9.664408e-01 3.355918e-02
+ [427,] 9.658547e-01 3.414527e-02
+ [428,] 9.957877e-01 4.212286e-03
+ [429,] 9.340558e-01 6.594419e-02
+ [430,] 1.208812e-01 8.791188e-01
+ [431,] 9.870684e-01 1.293155e-02
+ [432,] 7.343368e-06 9.999927e-01
+ [433,] 5.565339e-01 4.434661e-01
+ [434,] 9.589347e-01 4.106525e-02
+ [435,] 6.552178e-01 3.447822e-01
+ [436,] 9.699569e-01 3.004307e-02
+ [437,] 8.726148e-01 1.273852e-01
+ [438,] 9.893161e-01 1.068390e-02
+ [439,] 1.034719e-04 9.998965e-01
+ [440,] 2.266233e-01 7.733767e-01
+ [441,] 9.056386e-01 9.436137e-02
+ [442,] 1.033798e-03 9.989662e-01
+ [443,] 4.236508e-01 5.763492e-01
+ [444,] 8.270011e-01 1.729989e-01
+ [445,] 2.328348e-01 7.671652e-01
+ [446,] 9.876330e-01 1.236698e-02
+ [447,] 1.112155e-01 8.887845e-01
+ [448,] 7.876084e-01 2.123916e-01
+ [449,] 9.910933e-01 8.906701e-03
+ [450,] 9.528376e-01 4.716235e-02
+ [451,] 9.960872e-01 3.912800e-03
+ [452,] 9.345807e-01 6.541933e-02
+ [453,] 9.041589e-01 9.584109e-02
+ [454,] 9.993960e-01 6.039770e-04
+ [455,] 4.833774e-04 9.995166e-01
+ [456,] 9.977994e-01 2.200574e-03
+ [457,] 2.744083e-01 7.255917e-01
+ [458,] 9.860802e-01 1.391984e-02
+ [459,] 5.011965e-01 4.988035e-01
+ [460,] 8.821201e-01 1.178799e-01
+ [461,] 3.507979e-01 6.492021e-01
+ [462,] 4.173670e-01 5.826330e-01
+ [463,] 2.145861e-01 7.854139e-01
+ [464,] 9.744644e-01 2.553557e-02
+ [465,] 9.290791e-01 7.092093e-02
+ [466,] 9.694142e-01 3.058585e-02
+ [467,] 1.233711e-01 8.766289e-01
+ [468,] 6.850433e-01 3.149567e-01
+ [469,] 8.881011e-01 1.118989e-01
+ [470,] 9.996272e-01 3.728017e-04
+ [471,] 1.574015e-01 8.425985e-01
+ [472,] 4.090597e-01 5.909403e-01
+ [473,] 3.460888e-01 6.539112e-01
+ [474,] 9.896204e-01 1.037957e-02
+ [475,] 8.124723e-01 1.875277e-01
+ [476,] 2.971570e-02 9.702843e-01
+ [477,] 9.983748e-01 1.625161e-03
+ [478,] 3.089913e-01 6.910087e-01
+ [479,] 8.696439e-01 1.303561e-01
+ [480,] 8.771116e-01 1.228884e-01
+ [481,] 8.625120e-01 1.374880e-01
+ [482,] 3.698777e-01 6.301223e-01
+ [483,] 4.662514e-01 5.337486e-01
+ [484,] 9.883164e-01 1.168356e-02
+ [485,] 9.837709e-01 1.622912e-02
+ [486,] 6.220305e-01 3.779695e-01
+ [487,] 9.524560e-01 4.754396e-02
+ [488,] 2.318815e-03 9.976812e-01
+ [489,] 1.000000e+00 1.128029e-12
+ [490,] 4.516021e-01 5.483979e-01
+ [491,] 9.715882e-01 2.841179e-02
+ [492,] 3.536132e-02 9.646387e-01
+ [493,] 9.761808e-01 2.381916e-02
+ [494,] 9.683108e-01 3.168916e-02
+ [495,] 1.000000e+00 4.186311e-12
+ [496,] 8.447814e-01 1.552186e-01
+ [497,] 7.885646e-06 9.999921e-01
+ [498,] 9.792429e-01 2.075712e-02
+ [499,] 8.415686e-01 1.584314e-01
+ [500,] 8.307581e-01 1.692419e-01
+ [501,] 2.043670e-01 7.956330e-01
+ [502,] 9.404463e-01 5.955374e-02
+ [503,] 8.836199e-01 1.163801e-01
+ [504,] 3.975993e-01 6.024007e-01
+ [505,] 3.144121e-02 9.685588e-01
+ [506,] 9.838196e-01 1.618040e-02
+ [507,] 9.996337e-01 3.663278e-04
+ [508,] 1.730305e-01 8.269695e-01
+ [509,] 9.163447e-01 8.365533e-02
+ [510,] 9.929256e-01 7.074359e-03
+ [511,] 4.831221e-01 5.168779e-01
+ [512,] 9.921736e-01 7.826355e-03
+ [513,] 4.972150e-01 5.027850e-01
+ [514,] 7.231381e-04 9.992769e-01
+ [515,] 9.806714e-01 1.932864e-02
+ [516,] 1.000000e+00 1.226269e-12
+ [517,] 1.000000e+00 8.804832e-13
+ [518,] 3.100211e-01 6.899789e-01
+ [519,] 6.354493e-01 3.645507e-01
+ [520,] 9.923881e-01 7.611885e-03
+ [521,] 8.942395e-01 1.057605e-01
+ [522,] 5.274209e-01 4.725791e-01
+ [523,] 8.590562e-03 9.914094e-01
+ [524,] 9.988373e-01 1.162653e-03
+ [525,] 7.043004e-01 2.956996e-01
+ [526,] 9.656959e-01 3.430414e-02
+ [527,] 9.590811e-01 4.091889e-02
+ [528,] 9.921430e-01 7.856970e-03
+ [529,] 2.210000e-02 9.779000e-01
+ [530,] 5.452140e-01 4.547860e-01
+ [531,] 5.263582e-01 4.736418e-01
+ [532,] 1.205892e-01 8.794108e-01
+ [533,] 9.985423e-01 1.457734e-03
+ [534,] 9.482809e-01 5.171909e-02
+ [535,] 9.824245e-01 1.757552e-02
+ [536,] 2.862350e-01 7.137650e-01
+ [537,] 8.723084e-01 1.276916e-01
+ [538,] 8.773215e-01 1.226785e-01
+ [539,] 1.452020e-03 9.985480e-01
+ [540,] 7.463634e-01 2.536366e-01
+ [541,] 2.620414e-01 7.379586e-01
+ [542,] 8.742614e-01 1.257386e-01
+ [543,] 7.980283e-01 2.019717e-01
+ [544,] 8.997678e-01 1.002322e-01
+ [545,] 9.886184e-01 1.138164e-02
+ [546,] 2.864718e-01 7.135282e-01
+ [547,] 8.976582e-01 1.023418e-01
+ [548,] 6.955674e-01 3.044326e-01
+ [549,] 1.479651e-01 8.520349e-01
+ [550,] 9.959797e-01 4.020346e-03
+ [551,] 9.973686e-01 2.631394e-03
+ [552,] 8.951086e-01 1.048914e-01
+ [553,] 1.407936e-01 8.592064e-01
+ [554,] 6.584733e-01 3.415267e-01
+ [555,] 8.693014e-01 1.306986e-01
+ [556,] 4.602179e-01 5.397821e-01
+ [557,] 1.646587e-01 8.353413e-01
+ [558,] 6.855033e-01 3.144967e-01
+ [559,] 9.100789e-02 9.089921e-01
+ [560,] 8.967136e-01 1.032864e-01
+ [561,] 9.916188e-01 8.381196e-03
+ [562,] 1.627306e-02 9.837269e-01
+ [563,] 5.086819e-01 4.913181e-01
+ [564,] 7.510494e-03 9.924895e-01
+ [565,] 8.471099e-01 1.528901e-01
+ [566,] 3.612339e-01 6.387661e-01
+ [567,] 2.122751e-01 7.877249e-01
+ [568,] 9.905423e-01 9.457650e-03
+ [569,] 7.874464e-01 2.125536e-01
+ [570,] 4.203604e-02 9.579640e-01
+ [571,] 1.207803e-01 8.792197e-01
+ [572,] 1.002572e-02 9.899743e-01
+ [573,] 9.975235e-01 2.476538e-03
+ [574,] 5.028192e-01 4.971808e-01
+ [575,] 7.896246e-01 2.103754e-01
+ [576,] 5.215334e-03 9.947847e-01
+ [577,] 7.477562e-01 2.522438e-01
+ [578,] 9.945120e-01 5.487967e-03
+ [579,] 2.133345e-01 7.866655e-01
+ [580,] 8.970980e-01 1.029020e-01
+ [581,] 5.204250e-01 4.795750e-01
+ [582,] 5.602128e-01 4.397872e-01
+ [583,] 6.664363e-01 3.335637e-01
+ [584,] 6.412443e-02 9.358756e-01
+ [585,] 9.582980e-01 4.170202e-02
+ [586,] 3.046759e-02 9.695324e-01
+ [587,] 3.029548e-01 6.970452e-01
+ [588,] 6.014547e-01 3.985453e-01
+ [589,] 7.748419e-01 2.251581e-01
+ [590,] 9.208535e-01 7.914646e-02
+ [591,] 9.747870e-01 2.521303e-02
+ [592,] 5.851048e-01 4.148952e-01
+ [593,] 9.424681e-01 5.753194e-02
+ [594,] 9.030185e-02 9.096981e-01
+ [595,] 8.147180e-01 1.852820e-01
+ [596,] 2.747605e-01 7.252395e-01
+ [597,] 4.393928e-02 9.560607e-01
+ [598,] 6.698978e-01 3.301022e-01
+ [599,] 8.233008e-01 1.766992e-01
+ [600,] 7.866900e-01 2.133100e-01
+ [601,] 7.293411e-01 2.706589e-01
+ [602,] 6.512787e-01 3.487213e-01
+ [603,] 5.516215e-02 9.448379e-01
+ [604,] 7.505578e-01 2.494422e-01
+ [605,] 7.413738e-01 2.586262e-01
+ [606,] 5.011774e-01 4.988226e-01
+ [607,] 9.876744e-01 1.232564e-02
+ [608,] 2.528592e-04 9.997471e-01
+ [609,] 9.399919e-01 6.000808e-02
+ [610,] 9.992189e-01 7.811212e-04
+ [611,] 3.826653e-01 6.173347e-01
+ [612,] 5.592367e-01 4.407633e-01
+ [613,] 2.481512e-01 7.518488e-01
+ [614,] 1.000000e+00 2.613164e-12
+ [615,] 9.601913e-01 3.980865e-02
+ [616,] 1.777072e-03 9.982229e-01
+ [617,] 1.943215e-02 9.805678e-01
+ [618,] 3.922088e-01 6.077912e-01
+ [619,] 9.402368e-05 9.999060e-01
+ [620,] 8.568295e-01 1.431705e-01
+ [621,] 8.637972e-01 1.362028e-01
+ [622,] 7.941609e-01 2.058391e-01
+ [623,] 6.371171e-01 3.628829e-01
+ [624,] 7.430267e-02 9.256973e-01
+ [625,] 4.281877e-01 5.718123e-01
+ [626,] 9.928085e-01 7.191501e-03
+ [627,] 9.187808e-01 8.121921e-02
+ [628,] 3.422307e-01 6.577693e-01
+ [629,] 9.649628e-01 3.503718e-02
+ [630,] 9.981101e-01 1.889863e-03
+ [631,] 3.313639e-01 6.686361e-01
+ [632,] 1.288895e-01 8.711105e-01
+ [633,] 9.323697e-01 6.763025e-02
+ [634,] 9.527464e-04 9.990473e-01
+ [635,] 3.067921e-01 6.932079e-01
+ [636,] 9.383407e-01 6.165928e-02
+ [637,] 9.286252e-01 7.137478e-02
+ [638,] 1.678390e-04 9.998322e-01
+ [639,] 8.786532e-01 1.213468e-01
+ [640,] 1.299837e-01 8.700163e-01
+ [641,] 8.443400e-02 9.155660e-01
+ [642,] 8.090958e-01 1.909042e-01
+ [643,] 9.474987e-01 5.250130e-02
+ [644,] 9.745011e-01 2.549894e-02
+ [645,] 8.581219e-01 1.418781e-01
+ [646,] 6.171911e-01 3.828089e-01
+ [647,] 1.162582e-01 8.837418e-01
+ [648,] 8.946123e-01 1.053877e-01
+ [649,] 1.020510e-01 8.979490e-01
+ [650,] 1.717134e-01 8.282866e-01
+ [651,] 2.222728e-02 9.777727e-01
+ [652,] 7.769272e-01 2.230728e-01
+ [653,] 1.188090e-03 9.988119e-01
+ [654,] 4.755264e-01 5.244736e-01
+ [655,] 9.997803e-01 2.196742e-04
+ [656,] 6.201832e-02 9.379817e-01
+ [657,] 2.635627e-01 7.364373e-01
+ [658,] 3.708962e-01 6.291038e-01
+ [659,] 1.928370e-01 8.071630e-01
+ [660,] 7.373490e-01 2.626510e-01
+ [661,] 4.838425e-01 5.161575e-01
+ [662,] 7.755058e-01 2.244942e-01
+ [663,] 9.771925e-01 2.280748e-02
+ [664,] 7.053235e-01 2.946765e-01
+ [665,] 9.452668e-01 5.473325e-02
+ [666,] 1.018602e-03 9.989814e-01
+ [667,] 6.126261e-01 3.873739e-01
+ [668,] 3.876380e-01 6.123620e-01
+ [669,] 4.202764e-04 9.995797e-01
+ [670,] 9.313660e-01 6.863399e-02
+ [671,] 9.785479e-01 2.145207e-02
+ [672,] 8.324184e-01 1.675816e-01
+ [673,] 1.690094e-02 9.830991e-01
+ [674,] 9.581081e-01 4.189191e-02
+ [675,] 9.234334e-01 7.656659e-02
+ [676,] 5.961654e-01 4.038346e-01
+ [677,] 9.592479e-01 4.075211e-02
+ [678,] 6.217618e-03 9.937824e-01
+ [679,] 1.221470e-01 8.778530e-01
+ [680,] 9.095752e-01 9.042479e-02
+ [681,] 8.917269e-01 1.082731e-01
+ [682,] 9.748389e-01 2.516113e-02
+ [683,] 8.966608e-01 1.033392e-01
+ [684,] 9.165293e-01 8.347074e-02
+ [685,] 1.968389e-01 8.031611e-01
+ [686,] 1.727611e-01 8.272389e-01
+ [687,] 9.946565e-01 5.343531e-03
+ [688,] 1.985476e-01 8.014524e-01
+ [689,] 2.489433e-02 9.751057e-01
+ [690,] 6.820336e-01 3.179664e-01
+ [691,] 6.046227e-01 3.953773e-01
+ [692,] 7.607601e-01 2.392399e-01
+ [693,] 5.571263e-01 4.428737e-01
+ [694,] 9.543930e-01 4.560703e-02
+ [695,] 9.202494e-01 7.975062e-02
+ [696,] 9.985083e-01 1.491683e-03
+ [697,] 1.000000e+00 5.017585e-13
+ [698,] 5.148938e-01 4.851062e-01
+ [699,] 9.650107e-01 3.498926e-02
+ [700,] 5.078510e-01 4.921490e-01
+ [701,] 7.051839e-01 2.948161e-01
+ [702,] 9.387588e-01 6.124122e-02
+ [703,] 6.500694e-01 3.499306e-01
+ [704,] 7.826631e-01 2.173369e-01
+ [705,] 5.467174e-01 4.532826e-01
+ [706,] 6.685972e-01 3.314028e-01
+ [707,] 6.903389e-02 9.309661e-01
+ [708,] 6.737454e-02 9.326255e-01
+ [709,] 7.671910e-01 2.328090e-01
+ [710,] 8.344354e-01 1.655646e-01
+ [711,] 9.578536e-01 4.214636e-02
+ [712,] 1.883981e-01 8.116019e-01
+ [713,] 9.999702e-01 2.981164e-05
+ [714,] 8.667252e-01 1.332748e-01
+ [715,] 3.454901e-05 9.999655e-01
+ [716,] 9.999175e-01 8.252560e-05
+ [717,] 9.966698e-01 3.330178e-03
+ [718,] 7.811108e-01 2.188892e-01
+ [719,] 9.879922e-01 1.200775e-02
+ [720,] 9.428948e-01 5.710518e-02
+ [721,] 6.068256e-01 3.931744e-01
+ [722,] 6.795688e-02 9.320431e-01
+ [723,] 4.069389e-01 5.930611e-01
+ [724,] 9.152193e-01 8.478069e-02
+ [725,] 3.296583e-01 6.703417e-01
+ [726,] 9.488716e-01 5.112844e-02
+ [727,] 9.927072e-01 7.292806e-03
+ [728,] 2.244116e-02 9.775588e-01
+ [729,] 1.082137e-02 9.891786e-01
+ [730,] 9.666174e-01 3.338263e-02
+ [731,] 4.364280e-01 5.635720e-01
+ [732,] 1.752263e-01 8.247737e-01
+ [733,] 8.146686e-01 1.853314e-01
+ [734,] 9.973848e-01 2.615190e-03
+ [735,] 9.603610e-01 3.963902e-02
+ [736,] 2.962835e-02 9.703716e-01
+ [737,] 2.068788e-01 7.931212e-01
+ [738,] 4.035833e-01 5.964167e-01
+ [739,] 8.892730e-01 1.107270e-01
+ [740,] 4.208790e-02 9.579121e-01
+ [741,] 5.985464e-02 9.401454e-01
+ [742,] 5.742291e-01 4.257709e-01
+ [743,] 9.949423e-01 5.057712e-03
+ [744,] 5.045159e-01 4.954841e-01
+ [745,] 1.580400e-02 9.841960e-01
+ [746,] 4.636917e-01 5.363083e-01
+ [747,] 2.432630e-02 9.756737e-01
+ [748,] 4.111826e-01 5.888174e-01
+ [749,] 9.998100e-01 1.899539e-04
+ [750,] 9.993811e-01 6.188557e-04
+ [751,] 3.426027e-01 6.573973e-01
+ [752,] 2.019929e-01 7.980071e-01
+ [753,] 3.361930e-01 6.638070e-01
+ [754,] 8.904373e-01 1.095627e-01
+ [755,] 9.831787e-01 1.682130e-02
+ [756,] 2.008013e-01 7.991987e-01
+ [757,] 1.000000e+00 3.820051e-13
+ [758,] 9.754109e-01 2.458912e-02
+ [759,] 8.818198e-01 1.181802e-01
+ [760,] 7.374960e-01 2.625040e-01
+ [761,] 9.932842e-01 6.715811e-03
+ [762,] 3.264024e-01 6.735976e-01
+ [763,] 6.181963e-01 3.818037e-01
+ [764,] 1.873242e-01 8.126758e-01
+ [765,] 9.625496e-01 3.745042e-02
+ [766,] 6.343960e-01 3.656040e-01
+ [767,] 2.306660e-01 7.693340e-01
+ [768,] 9.993733e-01 6.266609e-04
+ [769,] 6.557427e-01 3.442573e-01
+ [770,] 9.960220e-01 3.978039e-03
+ [771,] 9.944524e-01 5.547588e-03
+ [772,] 1.105657e-01 8.894343e-01
+ [773,] 9.997752e-01 2.247583e-04
+ [774,] 9.476235e-01 5.237653e-02
+ [775,] 1.443822e-01 8.556178e-01
+ [776,] 3.135040e-01 6.864960e-01
+ [777,] 8.908304e-01 1.091696e-01
+ [778,] 5.724764e-01 4.275236e-01
+ [779,] 9.998023e-01 1.977018e-04
+ [780,] 6.172125e-01 3.827875e-01
+ [781,] 6.866700e-01 3.133300e-01
+ [782,] 9.941643e-01 5.835668e-03
+ [783,] 6.137422e-01 3.862578e-01
+ [784,] 1.402770e-01 8.597230e-01
+ [785,] 9.982149e-01 1.785080e-03
+ [786,] 9.233024e-01 7.669760e-02
+ [787,] 9.645979e-01 3.540207e-02
+ [788,] 9.998747e-01 1.253271e-04
+ [789,] 1.012483e-01 8.987517e-01
+ [790,] 5.580504e-02 9.441950e-01
+ [791,] 7.169214e-01 2.830786e-01
+ [792,] 9.998594e-01 1.405931e-04
+ [793,] 9.973576e-01 2.642356e-03
+ [794,] 4.438149e-01 5.561851e-01
+ [795,] 7.163945e-01 2.836055e-01
+ [796,] 5.768853e-01 4.231147e-01
+ [797,] 9.973666e-01 2.633368e-03
+ [798,] 7.933529e-01 2.066471e-01
+ [799,] 9.933370e-01 6.663011e-03
+ [800,] 5.851892e-01 4.148108e-01
+ [801,] 9.473097e-01 5.269030e-02
+ [802,] 3.450983e-01 6.549017e-01
+ [803,] 7.425327e-01 2.574673e-01
+ [804,] 9.975623e-01 2.437716e-03
+ [805,] 2.331643e-02 9.766836e-01
+ [806,] 2.166078e-02 9.783392e-01
+ [807,] 1.000000e+00 7.793512e-13
+ [808,] 9.997826e-01 2.174194e-04
+ [809,] 1.545453e-01 8.454547e-01
+ [810,] 5.894758e-03 9.941052e-01
+ [811,] 7.531498e-01 2.468502e-01
+ [812,] 4.818813e-01 5.181187e-01
+ [813,] 9.326855e-01 6.731454e-02
+ [814,] 1.679480e-01 8.320520e-01
+ [815,] 2.679766e-02 9.732023e-01
+ [816,] 2.814570e-02 9.718543e-01
+ [817,] 9.680453e-01 3.195466e-02
+ [818,] 8.281918e-01 1.718082e-01
+ [819,] 1.671346e-08 1.000000e+00
+ [820,] 2.547979e-01 7.452021e-01
+ [821,] 9.283037e-01 7.169630e-02
+ [822,] 7.991517e-01 2.008483e-01
+ [823,] 1.638892e-01 8.361108e-01
+ [824,] 8.559577e-01 1.440423e-01
+ [825,] 9.151689e-01 8.483111e-02
+ [826,] 6.753594e-01 3.246406e-01
+ [827,] 1.089488e-01 8.910512e-01
+ [828,] 7.169349e-01 2.830651e-01
+ [829,] 9.749479e-01 2.505211e-02
+ [830,] 3.361997e-01 6.638003e-01
+ [831,] 9.792006e-01 2.079938e-02
+ [832,] 3.367724e-02 9.663228e-01
+ [833,] 1.872133e-04 9.998128e-01
+ [834,] 9.183899e-01 8.161009e-02
+ [835,] 8.182834e-01 1.817166e-01
+ [836,] 5.091527e-02 9.490847e-01
+ [837,] 9.821436e-01 1.785637e-02
+ [838,] 6.320789e-01 3.679211e-01
+ [839,] 9.991754e-01 8.245962e-04
+ [840,] 7.884818e-02 9.211518e-01
+ [841,] 2.907102e-01 7.092898e-01
+ [842,] 9.996495e-01 3.505302e-04
+ [843,] 9.038570e-01 9.614297e-02
+ [844,] 6.742188e-01 3.257812e-01
+ [845,] 9.275953e-01 7.240467e-02
+ [846,] 9.421711e-01 5.782887e-02
+ [847,] 8.323897e-01 1.676103e-01
+ [848,] 8.341049e-01 1.658951e-01
+ [849,] 8.123935e-01 1.876065e-01
+ [850,] 7.751930e-01 2.248070e-01
+ [851,] 1.000000e+00 4.529572e-11
+ [852,] 9.999798e-01 2.022365e-05
+ [853,] 9.286488e-01 7.135123e-02
+ [854,] 1.307177e-01 8.692823e-01
+ [855,] 1.950976e-01 8.049024e-01
+ [856,] 8.882624e-01 1.117376e-01
+ [857,] 9.934199e-01 6.580143e-03
+ [858,] 9.012126e-01 9.878739e-02
+ [859,] 3.181162e-01 6.818838e-01
+ [860,] 1.000000e+00 1.662734e-12
+ [861,] 9.998916e-01 1.084375e-04
+ [862,] 9.521924e-01 4.780760e-02
+ [863,] 5.121978e-01 4.878022e-01
+ [864,] 9.878447e-01 1.215527e-02
+ [865,] 4.053560e-01 5.946440e-01
+ [866,] 6.330874e-01 3.669126e-01
+ [867,] 2.639605e-01 7.360395e-01
+ [868,] 9.766624e-01 2.333761e-02
+ [869,] 9.607748e-01 3.922522e-02
+ [870,] 1.521582e-01 8.478418e-01
+ [871,] 8.166104e-01 1.833896e-01
+ [872,] 1.000000e+00 1.126904e-13
+ [873,] 8.757075e-01 1.242925e-01
+ [874,] 9.876446e-01 1.235540e-02
+ [875,] 1.633466e-03 9.983665e-01
+ [876,] 8.810014e-01 1.189986e-01
+ [877,] 3.421406e-05 9.999658e-01
+ [878,] 8.366216e-01 1.633784e-01
+ [879,] 1.136040e-01 8.863960e-01
+ [880,] 9.901965e-01 9.803506e-03
+ [881,] 9.970764e-01 2.923577e-03
+ [882,] 9.936931e-01 6.306932e-03
+ [883,] 9.680904e-01 3.190959e-02
+ [884,] 7.743564e-01 2.256436e-01
+ [885,] 4.628813e-01 5.371187e-01
+ [886,] 5.499584e-01 4.500416e-01
+ [887,] 9.739473e-01 2.605269e-02
+ [888,] 4.869526e-05 9.999513e-01
+ [889,] 7.873412e-01 2.126588e-01
+ [890,] 9.838235e-01 1.617647e-02
+ [891,] 9.034764e-01 9.652356e-02
+ [892,] 9.868861e-01 1.311394e-02
+ [893,] 1.000000e+00 3.998935e-12
+ [894,] 9.938462e-01 6.153763e-03
+ [895,] 9.972867e-01 2.713322e-03
+ [896,] 9.985843e-01 1.415739e-03
+ [897,] 9.171586e-02 9.082841e-01
+ [898,] 1.000000e+00 1.806087e-14
+ [899,] 8.379832e-01 1.620168e-01
+ [900,] 9.482601e-04 9.990517e-01
+ [901,] 8.224751e-02 9.177525e-01
+ [902,] 9.884923e-01 1.150771e-02
+ [903,] 9.960517e-01 3.948346e-03
+ [904,] 9.697359e-01 3.026414e-02
+ [905,] 9.632263e-01 3.677369e-02
+ [906,] 2.070147e-01 7.929853e-01
+ [907,] 1.000000e+00 3.511095e-10
+ [908,] 8.267624e-01 1.732376e-01
+ [909,] 9.996600e-01 3.400368e-04
+ [910,] 9.181254e-01 8.187459e-02
+ [911,] 8.974020e-01 1.025980e-01
+ [912,] 2.441313e-01 7.558687e-01
+ [913,] 8.816056e-01 1.183944e-01
+ [914,] 9.806147e-01 1.938532e-02
+ [915,] 9.005870e-02 9.099413e-01
+ [916,] 9.999726e-01 2.735364e-05
+ [917,] 7.579647e-01 2.420353e-01
+ [918,] 1.443609e-04 9.998556e-01
+ [919,] 2.560940e-01 7.439060e-01
+ [920,] 2.055175e-01 7.944825e-01
+ [921,] 9.403228e-01 5.967716e-02
+ [922,] 3.591427e-02 9.640857e-01
+ [923,] 9.516033e-02 9.048397e-01
+ [924,] 1.935998e-01 8.064002e-01
+ [925,] 2.905213e-02 9.709479e-01
+ [926,] 7.700201e-02 9.229980e-01
+ [927,] 1.725842e-01 8.274158e-01
+ [928,] 3.405277e-01 6.594723e-01
+ [929,] 9.930293e-01 6.970699e-03
+ [930,] 7.301708e-01 2.698292e-01
+ [931,] 1.000000e+00 2.542505e-09
+ [932,] 5.407903e-01 4.592097e-01
+ [933,] 9.661448e-01 3.385519e-02
+ [934,] 9.940479e-01 5.952136e-03
+ [935,] 1.325122e-01 8.674878e-01
+ [936,] 4.444361e-01 5.555639e-01
+ [937,] 8.571585e-01 1.428415e-01
+ [938,] 1.987251e-01 8.012749e-01
+ [939,] 9.518054e-03 9.904819e-01
+ [940,] 9.999445e-01 5.548181e-05
+ [941,] 9.838943e-01 1.610570e-02
+ [942,] 1.000000e+00 1.911484e-13
+ [943,] 9.832527e-01 1.674731e-02
+ [944,] 9.890195e-01 1.098050e-02
+ [945,] 1.307139e-01 8.692861e-01
+ [946,] 7.198691e-03 9.928013e-01
+ [947,] 1.928184e-01 8.071816e-01
+ [948,] 9.568444e-01 4.315559e-02
+ [949,] 1.749288e-02 9.825071e-01
+ [950,] 9.412860e-01 5.871399e-02
+ [951,] 4.730129e-01 5.269871e-01
+ [952,] 5.111763e-01 4.888237e-01
+ [953,] 9.488692e-01 5.113082e-02
+ [954,] 5.641394e-02 9.435861e-01
+ [955,] 3.545869e-01 6.454131e-01
+ [956,] 7.408155e-01 2.591845e-01
+ [957,] 9.902082e-01 9.791802e-03
+ [958,] 9.695706e-01 3.042940e-02
+ [959,] 2.794426e-01 7.205574e-01
+ [960,] 4.097806e-01 5.902194e-01
+ [961,] 9.315528e-01 6.844718e-02
+ [962,] 5.057657e-01 4.942343e-01
+ [963,] 9.622976e-01 3.770242e-02
+ [964,] 8.758621e-01 1.241379e-01
+ [965,] 6.811835e-01 3.188165e-01
+ [966,] 8.477141e-01 1.522859e-01
+ [967,] 9.021009e-01 9.789909e-02
+ [968,] 3.485184e-01 6.514816e-01
+ [969,] 6.333432e-01 3.666568e-01
+ [970,] 7.803594e-01 2.196406e-01
+ [971,] 7.651024e-01 2.348976e-01
+ [972,] 6.862740e-01 3.137260e-01
+ [973,] 1.330977e-06 9.999987e-01
+ [974,] 1.470913e-06 9.999985e-01
+ [975,] 9.302444e-01 6.975556e-02
+ [976,] 8.840614e-01 1.159386e-01
+ [977,] 8.201665e-01 1.798335e-01
+ [978,] 9.845465e-01 1.545345e-02
+ [979,] 9.466116e-01 5.338843e-02
+ [980,] 9.048208e-02 9.095179e-01
+ [981,] 4.834691e-01 5.165309e-01
+ [982,] 1.968943e-02 9.803106e-01
+ [983,] 2.269054e-01 7.730946e-01
+ [984,] 9.175667e-01 8.243326e-02
+ [985,] 9.800026e-01 1.999736e-02
+ [986,] 2.775196e-01 7.224804e-01
+ [987,] 7.230131e-02 9.276987e-01
+ [988,] 9.543385e-01 4.566147e-02
+ [989,] 8.821437e-01 1.178563e-01
+ [990,] 9.291097e-01 7.089028e-02
+ [991,] 9.974923e-01 2.507745e-03
+ [992,] 7.547132e-01 2.452868e-01
+ [993,] 6.461511e-01 3.538489e-01
+ [994,] 2.252007e-01 7.747993e-01
+ [995,] 9.902907e-01 9.709293e-03
+ [996,] 9.578565e-01 4.214351e-02
+ [997,] 9.778610e-01 2.213900e-02
+ [998,] 9.459178e-01 5.408223e-02
+ [999,] 5.584305e-02 9.441570e-01
+[1000,] 9.786918e-01 2.130821e-02
+
+There were 50 or more warnings (use warnings() to see the first 50)
+> predict(model$finalModel,x1)$class
+   [1] 1 2 1 2 2 1 1 1 1 2 2 2 1 1 2 2 1 2 2 1 1 2 1 1 1 2 1 1 1 2 1 2 2
+  [34] 1 2 2 2 2 1 1 1 1 1 1 1 1 1 1 1 2 1 1 1 1 2 1 1 2 1 2 2 1 2 2 1 1
+  [67] 1 1 1 1 1 1 2 2 1 1 2 1 1 2 1 1 1 1 1 1 1 2 2 2 1 1 1 2 1 2 1 1 1
+ [100] 1 1 2 1 1 1 2 2 2 1 1 2 2 2 1 1 1 2 1 1 1 1 1 1 1 1 1 1 1 1 2 2 2
+ [133] 1 1 2 1 1 1 1 2 1 2 2 2 1 2 1 1 2 1 1 1 2 1 2 2 1 2 2 1 1 1 1 2 1
+ [166] 1 2 1 1 1 2 1 1 1 1 1 2 1 1 1 2 2 1 1 2 1 1 2 1 2 1 2 1 1 2 1 1 2
+ [199] 1 1 1 1 1 2 1 1 1 1 2 1 1 1 2 1 1 1 2 1 2 1 2 2 1 1 1 1 2 2 1 2 1
+ [232] 1 1 1 1 2 2 2 1 1 2 1 1 1 1 1 1 1 1 2 1 1 2 1 1 2 1 2 1 1 1 1 2 1
+ [265] 1 1 1 1 1 1 1 1 2 2 2 1 1 1 1 1 1 1 1 1 2 2 1 2 1 1 1 2 1 1 1 2 1
+ [298] 1 1 1 2 2 1 2 2 1 1 1 1 2 2 1 1 2 1 2 1 1 1 1 2 2 1 1 1 1 1 1 1 1
+ [331] 1 1 2 2 2 2 1 2 2 2 2 2 2 2 1 1 1 2 1 1 1 1 1 2 1 2 2 1 1 2 1 1 1
+ [364] 1 2 1 1 2 2 2 1 1 1 2 2 2 1 1 2 1 1 2 1 1 1 1 1 2 1 1 1 2 2 1 1 2
+ [397] 2 1 2 1 1 1 2 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 1 1 1 1 1 1 1 1 1 1 1
+ [430] 2 1 2 1 1 1 1 1 1 2 2 1 2 2 1 2 1 2 1 1 1 1 1 1 1 2 1 2 1 1 1 2 2
+ [463] 2 1 1 1 2 1 1 1 2 2 2 1 1 2 1 2 1 1 1 2 2 1 1 1 1 2 1 2 1 2 1 1 1
+ [496] 1 2 1 1 1 2 1 1 2 2 1 1 2 1 1 2 1 2 2 1 1 1 2 1 1 1 1 2 1 1 1 1 1
+ [529] 2 1 1 2 1 1 1 2 1 1 2 1 2 1 1 1 1 2 1 1 2 1 1 1 2 1 1 2 2 1 2 1 1
+ [562] 2 1 2 1 2 2 1 1 2 2 2 1 1 1 2 1 1 2 1 1 1 1 2 1 2 2 1 1 1 1 1 1 2
+ [595] 1 2 2 1 1 1 1 1 2 1 1 1 1 2 1 1 2 1 2 1 1 2 2 2 2 1 1 1 1 2 2 1 1
+ [628] 2 1 1 2 2 1 2 2 1 1 2 1 2 2 1 1 1 1 1 2 1 2 2 2 1 2 2 1 2 2 2 2 1
+ [661] 2 1 1 1 1 2 1 2 2 1 1 1 2 1 1 1 1 2 2 1 1 1 1 1 2 2 1 2 2 1 1 1 1
+ [694] 1 1 1 1 1 1 1 1 1 1 1 1 1 2 2 1 1 1 2 1 1 2 1 1 1 1 1 1 2 2 1 2 1
+ [727] 1 2 2 1 2 2 1 1 1 2 2 2 1 2 2 1 1 1 2 2 2 2 1 1 2 2 2 1 1 2 1 1 1
+ [760] 1 1 2 1 2 1 1 2 1 1 1 1 2 1 1 2 2 1 1 1 1 1 1 1 2 1 1 1 1 2 2 1 1
+ [793] 1 2 1 1 1 1 1 1 1 2 1 1 2 2 1 1 2 2 1 2 1 2 2 2 1 1 2 2 1 1 2 1 1
+ [826] 1 2 1 1 2 1 2 2 1 1 2 1 1 1 2 2 1 1 1 1 1 1 1 1 1 1 1 1 2 2 1 1 1
+ [859] 2 1 1 1 1 1 2 1 2 1 1 2 1 1 1 1 2 1 2 1 2 1 1 1 1 1 2 1 1 2 1 1 1
+ [892] 1 1 1 1 1 2 1 1 2 2 1 1 1 1 2 1 1 1 1 1 2 1 1 2 1 1 2 2 2 1 2 2 2
+ [925] 2 2 2 2 1 1 1 1 1 1 2 2 1 2 2 1 1 1 1 1 2 2 2 1 2 1 2 1 1 2 2 1 1
+ [958] 1 2 2 1 1 1 1 1 1 1 2 1 1 1 1 2 2 1 1 1 1 1 2 2 2 2 1 1 2 2 1 1 1
+ [991] 1 1 1 2 1 1 1 1 2 1
+Levels: 1 2
+There were 50 or more warnings (use warnings() to see the first 50)
+> table(predict(model$finalModel,x1)$class,y1)
+   y1
+      1   2
+  1 550 106
+  2 150 194
+There were 50 or more warnings (use warnings() to see the first 50)
